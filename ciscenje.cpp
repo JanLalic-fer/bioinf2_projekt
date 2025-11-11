@@ -139,12 +139,24 @@ int main(int argc, char *argv[])
         names.push_back(id);
     }
     unordered_map<pair<string, string>, pair<string, string>> cleanedSequences;
-#pragma omp parallel for
-    for (int i = 0; i < names.size(); i++)
+#pragma omp parallel
     {
-        for (int j = i + 1; j < names.size(); j++)
+        unordered_map<pair<string, string>, pair<string, string>> localMap;
+
+#pragma omp for nowait
+        for (int i = 0; i < names.size(); i++)
         {
-            cleanedSequences[{names[i], names[j]}] = poravnaj(sequences[names[i]], sequences[names[j]]);
+            for (int j = i + 1; j < names.size(); j++)
+            {
+                localMap[{names[i], names[j]}] = poravnaj(sequences[names[i]], sequences[names[j]]);
+            }
+        }
+
+#pragma omp critical
+        {
+            printf("Merging results from thread %d...\n", omp_get_thread_num());
+            for (auto &p : localMap)
+                cleanedSequences[p.first] = p.second;
         }
     }
     file.close();
