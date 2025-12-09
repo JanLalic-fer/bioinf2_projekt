@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <utility>
 #include <map>
+#include <ctime>
 
 using namespace std;
 
@@ -241,12 +242,14 @@ int main(int argc, char *argv[])
     string input = argv[1];
 
     unordered_map<pair<string, string>, pair<string, string>> alignments;
-    vector<vector<double>> a(4, vector<double>(5, 0.0));
+    vector<vector<double>> a(5, vector<double>(5, 0.0));
     vector<unordered_map<string, double>> e(4);
+
+    time_t start = time(nullptr);
 
     read_and_predict_hmm(input, alignments, a, e);
 
-    cout << "Transition matrix A (rows Begin/Match/Ins/Del -> columns Begin/Match/Ins/Del/End):\n";
+    cout << "Transition matrix A (rows Begin/Match/Ins/Del/End -> columns Begin/Match/Ins/Del/End):\n";
     for (auto &row : a)
     {
         for (auto &v : row)
@@ -263,5 +266,8 @@ int main(int argc, char *argv[])
     }
 
     cout << "\nTotal alignments read: " << alignments.size() << "\n";
+
+    time_t end = time(nullptr);
+    cout << "Time taken: " << difftime(end, start) << " seconds\n;" << endl;
     return 0;
 }
